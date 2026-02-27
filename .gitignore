@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+config/logs/
+*.log
+
+# PID files
+config/smith.pid
+
+# Environment
+.env
+.env.*
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Workspace (runtime artifacts)
+workspace/
+
+# Docker
+.docker/
+
+# Test coverage
+coverage/

@@ -1,0 +1,40 @@
+{
+  "name": "@morpheus/smith",
+  "version": "0.1.0",
+  "description": "Smith — Standalone remote execution agent for Morpheus",
+  "type": "module",
+  "bin": {
+    "smith": "./bin/smith.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node bin/smith.js start",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.18",
+    "@puppeteer/browsers": "^2.4.0",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "fs-extra": "^11.3.3",
+    "glob": "^11.0.0",
+    "js-yaml": "^4.1.1",
+    "puppeteer-core": "^23.11.1",
+    "ws": "^8.19.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.16.6",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}

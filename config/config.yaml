@@ -1,0 +1,21 @@
+# Smith Agent Configuration
+name: my-smith
+port: 7900
+auth_token: "f4f10d03-00a8-4c40-9197-896072baefa6"
+
+# Sandbox — confine all operations to this directory
+sandbox_dir: "/app"
+
+# Security
+readonly_mode: false
+enable_filesystem: true
+enable_shell: true
+enable_git: true
+enable_network: true
+allowed_shell_commands: []
+
+# Timeouts
+timeout_ms: 30000
+
+# Logging
+log_level: info

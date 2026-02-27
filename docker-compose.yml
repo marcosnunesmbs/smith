@@ -1,0 +1,35 @@
+# Smith — Standalone Remote Agent for Morpheus
+#
+# Usage:
+#   1. Initialize config (first time only):
+#      docker compose run --rm smith node bin/smith.js init --name my-smith
+#
+#   2. Edit the generated config:
+#      Edit /root/.smith/config.yaml (mounted from host)
+#
+#   3. Start:
+#      docker compose up -d
+#
+#   4. Check status:
+#      docker compose exec smith node bin/smith.js status
+#
+#   5. View logs:
+#      docker compose logs -f smith
+
+services:
+  smith:
+    build: .
+    container_name: smith-agent
+    restart: unless-stopped
+    ports:
+      - "${SMITH_PORT:-7900}:7900"
+    volumes:
+      # Persist config, logs, and browser cache across restarts
+      - ./config:/root/.smith
+      # Mount a workspace directory for Smith to operate on
+      - ${SMITH_WORKSPACE:-./workspace}:/workspace
+    environment:
+      - SMITH_HOME=/root/.smith
+      - NODE_ENV=production
+    # Override sandbox_dir to the mounted workspace inside the container
+    # (edit config/config.yaml after init to set sandbox_dir: /workspace)

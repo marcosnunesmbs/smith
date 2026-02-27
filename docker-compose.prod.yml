@@ -7,7 +7,7 @@
 
 services:
   smith1:
-    image: marcosnunesmbs/smith:0.1.0
+    build: .
     container_name: smith-1
     restart: unless-stopped
     ports:
@@ -32,7 +32,7 @@ services:
       - SMITH_LOG_LEVEL=${SMITH_LOG_LEVEL:-info}
 
   smith2:
-    image: marcosnunesmbs/smith:0.1.0
+    build: .
     container_name: smith-2
     restart: unless-stopped
     ports:
@@ -56,6 +56,31 @@ services:
       - SMITH_TIMEOUT_MS=${SMITH_TIMEOUT_MS:-90000}
       - SMITH_LOG_LEVEL=${SMITH_LOG_LEVEL:-info}
 
+  smith3:
+    build: .
+    container_name: smith-3
+    restart: unless-stopped
+    ports:
+      - "7902:7902"
+    volumes:
+      - smith-data-3:/root/.smith
+      - ${SMITH3_WORKSPACE:-./workspace}:/workspace
+    environment:
+      - SMITH_HOME=/root/.smith
+      - NODE_ENV=production
+      - SMITH_NAME=smith3
+      - SMITH_PORT=7902
+      - SMITH_SANDBOX_DIR=/workspace
+      - SMITH_AUTH_TOKEN=${SMITH3_AUTH_TOKEN:-}
+      - SMITH_READONLY_MODE=${SMITH_READONLY_MODE:-false}
+      - SMITH_ENABLE_FILESYSTEM=${SMITH_ENABLE_FILESYSTEM:-true}
+      - SMITH_ENABLE_SHELL=${SMITH_ENABLE_SHELL:-true}
+      - SMITH_ENABLE_GIT=${SMITH_ENABLE_GIT:-true}
+      - SMITH_ENABLE_NETWORK=${SMITH_ENABLE_NETWORK:-true}
+      - SMITH_ALLOWED_SHELL_COMMANDS=${SMITH_ALLOWED_SHELL_COMMANDS:-}
+      - SMITH_TIMEOUT_MS=${SMITH_TIMEOUT_MS:-90000}
+      - SMITH_LOG_LEVEL=${SMITH_LOG_LEVEL:-info}
 volumes:
   smith-data-1:
   smith-data-2:
+  smith-data-3:

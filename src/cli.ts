@@ -81,6 +81,7 @@ program
     }
 
     console.log(chalk.green(`Starting Smith '${config.name}' on port ${config.port}...`));
+    console.log(chalk.dim(`  Auth token: ${config.auth_token}`));
 
     const executor = new SmithExecutor(config);
     await executor.initialize();

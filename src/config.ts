@@ -16,8 +16,8 @@ export const SmithLocalConfigSchema = z.object({
   name: z.string().min(1).regex(/^[a-z0-9][a-z0-9_-]*$/),
   /** Port for the WebSocket server (default: 7900) */
   port: z.number().min(1).max(65535).default(7900),
-  /** Auth token that Morpheus must present to connect (auto-generated if omitted) */
-  auth_token: z.string().min(1).default(randomUUID()),
+  /** Auth token that Morpheus must present to connect (auto-generated and persisted if omitted) */
+  auth_token: z.string().min(1).optional(),
   /** Sandbox directory — all tool operations are confined here */
   sandbox_dir: z.string().default(process.cwd()),
   /** Block destructive operations when true */
@@ -38,7 +38,7 @@ export const SmithLocalConfigSchema = z.object({
   log_level: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 });
 
-export type SmithLocalConfig = z.infer<typeof SmithLocalConfigSchema>;
+export type SmithLocalConfig = z.infer<typeof SmithLocalConfigSchema> & { auth_token: string };
 
 // ─── Paths ───
 
@@ -46,11 +46,14 @@ const SMITH_HOME = process.env.SMITH_HOME ?? path.join(os.homedir(), '.smith');
 const CONFIG_FILE = process.env.SMITH_CONFIG_PATH ?? path.join(SMITH_HOME, 'config.yaml');
 const PID_FILE = path.join(SMITH_HOME, 'smith.pid');
 
+const AUTH_TOKEN_FILE = path.join(SMITH_HOME, 'auth_token');
+
 export const SMITH_PATHS = {
   home: SMITH_HOME,
   config: CONFIG_FILE,
   pid: PID_FILE,
   logs: path.join(SMITH_HOME, 'logs'),
+  authToken: AUTH_TOKEN_FILE,
 };
 
 // ─── Environment variable helpers ───
@@ -121,8 +124,28 @@ export function loadConfig(): SmithLocalConfig {
   }
 
   const result = SmithLocalConfigSchema.parse(merged);
-  cachedConfig = result;
-  return result;
+
+  // Resolve auth_token: explicit > persisted file > auto-generate & persist
+  if (!result.auth_token) {
+    let token: string | undefined;
+
+    // Try to read a previously persisted token
+    if (fs.existsSync(AUTH_TOKEN_FILE)) {
+      token = fs.readFileSync(AUTH_TOKEN_FILE, 'utf-8').trim();
+    }
+
+    // Generate and persist a new one
+    if (!token) {
+      token = randomUUID();
+      fs.ensureDirSync(SMITH_HOME);
+      fs.writeFileSync(AUTH_TOKEN_FILE, token, 'utf-8');
+    }
+
+    (result as any).auth_token = token;
+  }
+
+  cachedConfig = result as SmithLocalConfig;
+  return cachedConfig;
 }
 
 export function getConfig(): SmithLocalConfig {

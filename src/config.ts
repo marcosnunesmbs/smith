@@ -7,6 +7,7 @@ import path from 'path';
 import os from 'os';
 import yaml from 'js-yaml';
 import { z } from 'zod';
+import { randomUUID } from 'crypto';
 
 // ─── Schema ───
 
@@ -15,8 +16,8 @@ export const SmithLocalConfigSchema = z.object({
   name: z.string().min(1).regex(/^[a-z0-9][a-z0-9_-]*$/),
   /** Port for the WebSocket server (default: 7900) */
   port: z.number().min(1).max(65535).default(7900),
-  /** Auth token that Morpheus must present to connect */
-  auth_token: z.string().min(1),
+  /** Auth token that Morpheus must present to connect (auto-generated if omitted) */
+  auth_token: z.string().min(1).default(randomUUID()),
   /** Sandbox directory — all tool operations are confined here */
   sandbox_dir: z.string().default(process.cwd()),
   /** Block destructive operations when true */
@@ -52,23 +53,74 @@ export const SMITH_PATHS = {
   logs: path.join(SMITH_HOME, 'logs'),
 };
 
+// ─── Environment variable helpers ───
+
+function parseBool(value: string | undefined): boolean | undefined {
+  if (value === undefined) return undefined;
+  const lower = value.toLowerCase();
+  if (lower === 'true' || lower === '1' || lower === 'yes') return true;
+  if (lower === 'false' || lower === '0' || lower === 'no') return false;
+  return undefined;
+}
+
+/**
+ * Build a config object from SMITH_* environment variables.
+ * Returns only the keys that have corresponding env vars set.
+ */
+function configFromEnv(): Record<string, unknown> {
+  const env: Record<string, unknown> = {};
+
+  if (process.env.SMITH_NAME) env.name = process.env.SMITH_NAME;
+  if (process.env.SMITH_PORT) env.port = parseInt(process.env.SMITH_PORT, 10);
+  if (process.env.SMITH_AUTH_TOKEN) env.auth_token = process.env.SMITH_AUTH_TOKEN;
+  if (process.env.SMITH_SANDBOX_DIR) env.sandbox_dir = process.env.SMITH_SANDBOX_DIR;
+  if (process.env.SMITH_READONLY_MODE !== undefined) env.readonly_mode = parseBool(process.env.SMITH_READONLY_MODE);
+  if (process.env.SMITH_ENABLE_FILESYSTEM !== undefined) env.enable_filesystem = parseBool(process.env.SMITH_ENABLE_FILESYSTEM);
+  if (process.env.SMITH_ENABLE_SHELL !== undefined) env.enable_shell = parseBool(process.env.SMITH_ENABLE_SHELL);
+  if (process.env.SMITH_ENABLE_GIT !== undefined) env.enable_git = parseBool(process.env.SMITH_ENABLE_GIT);
+  if (process.env.SMITH_ENABLE_NETWORK !== undefined) env.enable_network = parseBool(process.env.SMITH_ENABLE_NETWORK);
+  if (process.env.SMITH_ALLOWED_SHELL_COMMANDS) env.allowed_shell_commands = process.env.SMITH_ALLOWED_SHELL_COMMANDS.split(',').map(s => s.trim()).filter(Boolean);
+  if (process.env.SMITH_TIMEOUT_MS) env.timeout_ms = parseInt(process.env.SMITH_TIMEOUT_MS, 10);
+  if (process.env.SMITH_LOG_LEVEL) env.log_level = process.env.SMITH_LOG_LEVEL;
+
+  return env;
+}
+
 // ─── Loader ───
 
 let cachedConfig: SmithLocalConfig | null = null;
 
+/**
+ * Load config with layered resolution:
+ *   1. config.yaml (base, if it exists)
+ *   2. SMITH_* env vars (override)
+ *
+ * If no config.yaml exists, config is built entirely from env vars.
+ * At minimum, `SMITH_NAME` (or its yaml equivalent) must be provided.
+ * `auth_token` is auto-generated if not provided from any source.
+ */
 export function loadConfig(): SmithLocalConfig {
   if (cachedConfig) return cachedConfig;
 
-  if (!fs.existsSync(CONFIG_FILE)) {
+  let fileConfig: Record<string, unknown> = {};
+
+  if (fs.existsSync(CONFIG_FILE)) {
+    const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
+    fileConfig = (yaml.load(raw) as Record<string, unknown>) ?? {};
+  }
+
+  const envConfig = configFromEnv();
+  const merged = { ...fileConfig, ...envConfig };
+
+  // Require at least name from some source
+  if (!merged.name) {
     throw new Error(
-      `Smith config not found at ${CONFIG_FILE}.\n` +
-      `Run 'smith init' to create a default config, or set SMITH_CONFIG_PATH.`
+      `Smith config not found at ${CONFIG_FILE} and SMITH_NAME env var is not set.\n` +
+      `Either run 'smith init' to create a config, or provide configuration via environment variables.`
     );
   }
 
-  const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
-  const parsed = yaml.load(raw) as Record<string, unknown>;
-  const result = SmithLocalConfigSchema.parse(parsed);
+  const result = SmithLocalConfigSchema.parse(merged);
   cachedConfig = result;
   return result;
 }

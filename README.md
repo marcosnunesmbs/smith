@@ -28,16 +28,55 @@ The SMITH agent is a lightweight extension of the Morpheus framework designed to
 
 ## Usage
 
-To start the SMITH agent, run:
-```
-npm run start
+### Local
+
+```bash
+smith init --name my-smith   # generates config.yaml + auth token
+smith start                  # starts the agent
+smith status                 # check status
+smith stop                   # stop the agent
 ```
 
-You can also use the command-line interface to manage the agent:
-- Start the agent: `npm run start`
-- Stop the agent: `npm run stop`
-- Check status: `npm run status`
-- Register the agent: `npm run register`
+### Docker
+
+1. Copy `.env.example` to `.env` and adjust as needed:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Start the container:
+   ```bash
+   docker compose up -d
+   ```
+
+3. Check status:
+   ```bash
+   docker compose exec smith node bin/smith.js status
+   ```
+
+4. View logs:
+   ```bash
+   docker compose logs -f smith
+   ```
+
+> **Note:** `auth_token` is auto-generated if not provided. To persist a token, either set `SMITH_AUTH_TOKEN` in `.env` or run `smith init` before starting.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `SMITH_NAME` | `smith` | Instance name |
+| `SMITH_PORT` | `7900` | WebSocket port |
+| `SMITH_AUTH_TOKEN` | *(auto-generated)* | Auth token for Morpheus connection |
+| `SMITH_SANDBOX_DIR` | `/workspace` | Sandbox root directory |
+| `SMITH_READONLY_MODE` | `false` | Block write/delete operations |
+| `SMITH_ENABLE_FILESYSTEM` | `true` | Enable filesystem tools |
+| `SMITH_ENABLE_SHELL` | `true` | Enable shell tools |
+| `SMITH_ENABLE_GIT` | `true` | Enable git tools |
+| `SMITH_ENABLE_NETWORK` | `true` | Enable network tools |
+| `SMITH_ALLOWED_SHELL_COMMANDS` | *(empty = all)* | Comma-separated command allowlist |
+| `SMITH_TIMEOUT_MS` | `30000` | Tool execution timeout (ms) |
+| `SMITH_LOG_LEVEL` | `info` | Log level: debug, info, warn, error |
 
 ## Development
 

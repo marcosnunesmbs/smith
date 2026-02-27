@@ -12,7 +12,7 @@ Key modules and their roles:
 - `src/devkit/registry.ts` — Side-effect registration pattern: each tool file calls `registerToolFactory()` at import time. `buildDevKit(ctx)` assembles the final tool set filtered by config toggles.
 - `src/devkit/adapters/shell.ts` — OS-aware shell adapter (Windows/Linux/Mac) using `ShellAdapter.create()` factory.
 - `src/protocol/types.ts` — Wire protocol types (kept in sync with Morpheus `src/runtime/smiths/types.ts`).
-- `src/config.ts` — Zod-validated YAML config loaded from `~/.smith/config.yaml` (or `SMITH_HOME`/`SMITH_CONFIG_PATH` env vars).
+- `src/config.ts` — Zod-validated config with layered resolution: YAML file (`~/.smith/config.yaml`) as base, `SMITH_*` env vars as override. Either source is sufficient on its own.
 - `src/cli.ts` — Commander CLI: `init`, `start`, `stop`, `status`.
 
 ## Build & Run
@@ -21,11 +21,11 @@ Key modules and their roles:
 npm install              # install deps
 npm run build            # tsc → dist/
 npm run dev              # tsx watch mode (development)
-npm run start            # node bin/smith.js start (requires `smith init` first)
+npm run start            # node bin/smith.js start (requires config.yaml or SMITH_* env vars)
 npm test                 # vitest
 ```
 
-Docker: `docker compose up -d` (see `docker-compose.yml` for volume mounts and env vars).
+Docker: `cp .env.example .env` → fill in values → `docker compose up -d`.
 
 Entry point: `bin/smith.js` → imports `dist/index.js` → runs Commander CLI.
 

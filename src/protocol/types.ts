@@ -61,7 +61,6 @@ export interface SmithPongMessage {
 export interface SmithRegisterMessage {
   type: 'register';
   name: string;
-  auth_token: string;
   capabilities: string[];
   protocol_version: number;
 }

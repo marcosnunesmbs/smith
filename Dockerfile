@@ -16,8 +16,8 @@ RUN npm run build
 FROM node:20-bookworm-slim
 
 # ── uv + uvx from official image (no curl pipe needed) ───────────────────────
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uvx /usr/local/bin/uvx
+COPY --from=ghcr.io/astral-sh/uv:0.7 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.7 /uvx /usr/local/bin/uvx
 
 # ── System + developer tools ──────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -84,7 +84,7 @@ RUN ln -sf /usr/bin/fdfind /usr/local/bin/fd
 RUN ln -sf /usr/bin/batcat /usr/local/bin/bat
 
 # ── Node.js global package managers ──────────────────────────────────────────
-RUN npm install -g yarn pnpm
+RUN corepack enable yarn && npm install -g pnpm
 
 # ── pipx for isolated Python CLI tools ───────────────────────────────────────
 RUN pip3 install --break-system-packages pipx

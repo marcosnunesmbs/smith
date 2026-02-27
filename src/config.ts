@@ -34,6 +34,14 @@ export const SmithLocalConfigSchema = z.object({
   allowed_shell_commands: z.array(z.string()).default([]),
   /** Tool execution timeout in ms */
   timeout_ms: z.number().min(1000).default(30000),
+  /** Maximum number of tasks that can run concurrently */
+  max_concurrent_tasks: z.number().int().min(1).default(10),
+  /** TLS certificate path (PEM) — enables wss:// when set together with tls_key */
+  tls_cert: z.string().optional(),
+  /** TLS private key path (PEM) — enables wss:// when set together with tls_cert */
+  tls_key: z.string().optional(),
+  /** Idle connection timeout in ms — connections with no activity for this long are closed. Disabled if not set. */
+  idle_timeout_ms: z.number().int().min(10000).optional(),
   /** Log level */
   log_level: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 });
@@ -84,6 +92,10 @@ function configFromEnv(): Record<string, unknown> {
   if (process.env.SMITH_ENABLE_NETWORK !== undefined) env.enable_network = parseBool(process.env.SMITH_ENABLE_NETWORK);
   if (process.env.SMITH_ALLOWED_SHELL_COMMANDS) env.allowed_shell_commands = process.env.SMITH_ALLOWED_SHELL_COMMANDS.split(',').map(s => s.trim()).filter(Boolean);
   if (process.env.SMITH_TIMEOUT_MS) env.timeout_ms = parseInt(process.env.SMITH_TIMEOUT_MS, 10);
+  if (process.env.SMITH_MAX_CONCURRENT_TASKS) env.max_concurrent_tasks = parseInt(process.env.SMITH_MAX_CONCURRENT_TASKS, 10);
+  if (process.env.SMITH_TLS_CERT) env.tls_cert = process.env.SMITH_TLS_CERT;
+  if (process.env.SMITH_TLS_KEY) env.tls_key = process.env.SMITH_TLS_KEY;
+  if (process.env.SMITH_IDLE_TIMEOUT_MS) env.idle_timeout_ms = parseInt(process.env.SMITH_IDLE_TIMEOUT_MS, 10);
   if (process.env.SMITH_LOG_LEVEL) env.log_level = process.env.SMITH_LOG_LEVEL;
 
   return env;
@@ -177,6 +189,16 @@ allowed_shell_commands: []
 
 # Timeouts
 timeout_ms: 30000
+
+# Concurrency — max tasks running in parallel
+max_concurrent_tasks: 10
+
+# TLS (wss://) — uncomment and set paths to enable
+# tls_cert: /path/to/cert.pem
+# tls_key: /path/to/key.pem
+
+# Idle timeout — close connections silent for this many ms (disabled if unset)
+# idle_timeout_ms: 300000
 
 # Logging
 log_level: info

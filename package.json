@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "prestart": "test -f dist/index.js || npm run build",
     "prepublishOnly": "npm run build",
     "start": "node bin/smith.js start",
     "dev": "tsx watch src/index.ts",

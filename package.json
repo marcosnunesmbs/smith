@@ -1,13 +1,18 @@
 {
-  "name": "@morpheus/smith",
+  "name": "morpheus-smith",
   "version": "0.1.0",
   "description": "Smith — Standalone remote execution agent for Morpheus",
   "type": "module",
   "bin": {
     "smith": "./bin/smith.js"
   },
+  "files": [
+    "dist/",
+    "bin/"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "start": "node bin/smith.js start",
     "dev": "tsx watch src/index.ts",
     "test": "vitest"

@@ -1,6 +1,6 @@
 {
   "name": "morpheus-smith",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Smith — Standalone remote execution agent for Morpheus",
   "type": "module",
   "bin": {

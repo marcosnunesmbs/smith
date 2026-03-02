@@ -14,7 +14,7 @@ The SMITH agent is a lightweight extension of the Morpheus framework designed to
 
 1. Clone the repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/marcosnunesmbs/smith
    cd smith
    ```
 
@@ -31,11 +31,26 @@ The SMITH agent is a lightweight extension of the Morpheus framework designed to
 ### Local
 
 ```bash
-smith init --name my-smith   # generates config.yaml + auth token
-smith start                  # starts the agent
-smith status                 # check status
-smith stop                   # stop the agent
+npx . init --name my-smith   # generates config.yaml + auth token
+npx . start                  # starts the agent
+npx . status                 # check status
+npx . stop                   # stop the agent
 ```
+
+### Global (npm)
+
+1. Install globally:
+   ```bash
+   npm install -g morpheus-smith
+   ```
+
+2. Initialize and start:
+   ```bash
+   smith init --name my-smith   # generates config.yaml + auth token
+   smith start                  # starts the agent
+   smith status                 # check status
+   smith stop                   # stop the agent
+   ```
 
 ### Docker
 

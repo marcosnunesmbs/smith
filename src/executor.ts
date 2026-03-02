@@ -5,8 +5,8 @@
  * (sandbox, security, etc.), then dispatches incoming task payloads to the matching tool.
  */
 import type { StructuredTool } from '@langchain/core/tools';
-import { buildDevKit } from './devkit/index.js';
-import type { ToolContext } from './devkit/types.js';
+import { buildDevKit } from 'morpheus-devkit';
+import type { ToolContext } from 'morpheus-devkit';
 import type { SmithLocalConfig } from './config.js';
 
 export class SmithExecutor {
